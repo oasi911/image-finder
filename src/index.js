@@ -26,7 +26,7 @@ refs.form.addEventListener('submit', e => {
     }
     Notiflix.Notify.success(`Hooray! We found ${data.data.totalHits} images.`);
     renderPictures(data);
-    refs.loadMoreBtn.style.display = 'block';
+    checkLoadMoreCondition(data);
   });
 });
 
@@ -34,17 +34,8 @@ refs.loadMoreBtn.style.display = 'none';
 refs.loadMoreBtn.addEventListener('click', () => {
   fetchCards(refs.form.elements.searchQuery.value, page + 1, perPage).then(
     data => {
-      const shownPictures = (page + 1) * perPage;
-      if (
-        (data.data.hits.length < perPage && data.data.hits.length !== 0) ||
-        data.data.totalHits === shownPictures
-      ) {
-        refs.loadMoreBtn.style.display = 'none';
-        Notiflix.Notify.info(
-          `We're sorry, but you've reached the end of search results.`
-        );
-      }
       renderPictures(data);
+      checkLoadMoreCondition(data);
       page += 1;
     }
   );
@@ -78,4 +69,19 @@ function renderPictures({ data: { hits } }) {
     )
     .join('');
   refs.gallery.insertAdjacentHTML('beforeend', photoCard);
+}
+
+function checkLoadMoreCondition(data) {
+  const shownPictures = page * perPage;
+  if (
+    (data.data.hits.length < perPage && data.data.hits.length !== 0) ||
+    shownPictures >= data.data.totalHits
+  ) {
+    refs.loadMoreBtn.style.display = 'none';
+    Notiflix.Notify.info(
+      `We're sorry, but you've reached the end of search results.`
+    );
+  } else {
+    refs.loadMoreBtn.style.display = 'block';
+  }
 }
